@@ -35,10 +35,12 @@ class Comp_Inputs:
     comp_C_gap: float = 0.0 # Clearance factor (clearance/displacement)
     comp_n_poly: float = 0.0 # Polytropic number
     comp_eff_mech: float = 1.0 # mechanical_efficiency
-    comp_frequency: float = 0.0 # Compressor frequency [Hz]
+    comp_frequency: float = 60.0 # Compressor frequency [Hz]
 
 @dataclass
-class HX_Inputs:
+class PHE_Inputs:
+    type = 'phe'
+    phx_N_element: int = 30
     phx_N_plate: int = 0 # Number of Plates
     phx_phi: float = 0.0 # Ratio of developed length to projected length
     phx_thk_plate: float = 0.0 # Single plate thickness
