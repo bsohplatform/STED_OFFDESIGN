@@ -98,6 +98,13 @@ class VCHP_off:
             
         return (InCond, OutCond, InEvap, OutEvap, noCond, noEvap)
     
+    def HX_Geometry(self, HX_input):
+        if HX_input == 'phe':
+            A_cross = 
+            
+        
+        
+    
     def OffDesign_Solver(self, InCond, OutCond, InEvap, OutEvap, InCond_REF, OutCond_REF, InEvap_REF, OutEvap_REF, Cycle_Inputs, Comp_Inputs, Cond_Inputs, Evap_Inputs, Outputs, noCond, noEvap):
         cond_p_ub = PropsSI('PCRIT','',0,'',0,InCond_REF.Y)
         if noCond == 0:
@@ -130,10 +137,8 @@ class VCHP_off:
                 OutEvap_REF.dl = PropsSI('D','P',OutEvap_REF.p,'Q',0.0, OutEvap_REF.Y )
                 OutEvap_REF.dg = PropsSI('D','P',OutEvap_REF.p,'Q',1.0, OutEvap_REF.Y )
                 
-                comp = COMP_module(OutEvap_REF, InCond_REF, Comp_Inputs)
-                (Outputs.comp_W, Outputs.comp_eff_isen, Cycle_Inputs.DSH, evap_a) = comp.Off(DSH = Cycle_Inputs.DSH)
-                
-                
+                comp = COMP_module()
+                (OutEvap_REF, InCond_REF, Outputs.comp_W, Outputs.comp_eff_isen, Cycle_Inputs.DSH, evap_a) = comp.Off(OutEvap_REF, InCond_REF, Comp_Inputs, DSH = Cycle_Inputs.DSH)
                 
 if __name__ == '__main__':
     inputs = {
