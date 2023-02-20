@@ -24,18 +24,21 @@ class Fluid_flow:
     
     
 @dataclass
-class Inputs:
+class Cycle_Inputs:
     cycle_layout: str = 'bas'
     cycle_DSH: float = 0.0    
     cycle_tol: float = 1.0e-3
-    
+
+@dataclass
+class Comp_Inputs:
     comp_V_dis: float = 0.0 # Displacement volume
     comp_C_gap: float = 0.0 # Clearance factor (clearance/displacement)
     comp_n_poly: float = 0.0 # Polytropic number
     comp_eff_mech: float = 1.0 # mechanical_efficiency
     comp_frequency: float = 0.0 # Compressor frequency [Hz]
-    
-    N_element: int = 0 # Number of finite discretized volume
+
+@dataclass
+class HX_Inputs:
     phx_N_plate: int = 0 # Number of Plates
     phx_phi: float = 0.0 # Ratio of developed length to projected length
     phx_thk_plate: float = 0.0 # Single plate thickness
