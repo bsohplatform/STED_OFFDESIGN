@@ -23,7 +23,7 @@ class Fluid_flow:
 class Cycle_Inputs:
     cycle_layout: str = 'bas'
     cycle_DSH: float = 0.0    
-    cycle_tol: float = 1.0e-3
+    M_ref: float = 0.0
 
 @dataclass
 class Comp_Inputs:
@@ -42,12 +42,19 @@ class PHX_Inputs:
     L_vert: float = 0.0 # Vertical length of PHE (Center to center of inlet and outlet ports)
     L_width: float = 0.0 # total horizontal length of PHE
     beta: float = 0.0 # chevron angle
+    cor_pitch: float = 0.0 # corrugation pitch
+    UA: float = 0.0
+    dp: float = 0.0
+    mdot_nominal:float = 0.0
 
 @dataclass
 class Outputs:
     comp_W: float = 0.0
     evap_Q: float = 0.0
     cond_Q: float = 0.0
+    DSC: float = 0.0
+    cond_M: float = 0.0
+    evap_rho: float = 0.0
     
     comp_eff_isen: float = 0.0
 
