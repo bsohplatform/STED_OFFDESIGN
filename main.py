@@ -2,6 +2,7 @@ from HP_dataclass import *
 import numpy as np
 from CoolProp.CoolProp import PropsSI
 import COMP_module
+import HX_module
 
 class VCHP_off:
     def __init__(self):
@@ -128,19 +129,44 @@ class VCHP_off:
                 
                 comp = COMP_module()
                 (OutEvap_REF, InCond_REF, Outputs.comp_W, Outputs.comp_eff_isen, Cycle_Inputs.DSH, evap_a) = comp.Off(OutEvap_REF, InCond_REF, Comp_Inputs, DSH = Cycle_Inputs.DSH)
+                OutCond_REF.m = InCond_REF.m
+                InEvap_REF.m = OutEvap_REF.m
                 
+                cond = HX_module(hx_type='phx', Inputs=Cond_Inputs)
+                (InCond_REF, OutCond_REF, InCond, OutCond, cond_Q, cond_rho)=cond.PHX('cond',InCond_REF, OutCond_REF, InCond, OutCond, noCond)
+                
+                evap = HX_module(hx_type='phx', Inputs=Evap_Inputs)
+                (InEvap_REF, OutEvap_REF, InEvap, OutEvap, evap_Q, evap_rho)=evap.PHX('evap',InEvap_REF, OutEvap_REF, InEvap, OutEvap, noEvap)
+                
+                if InEvap_REF.h == 0:
+                    evap_p_lb = OutEvap_REF.p
+                    err_evap_p = 1
+                else:
+                    err_evap_p = (InEvap_REF.h - OutCond_REF.h)/OutCond_REF.h
+                    if err_evap_p < 0:
+                        evap_p_lb = OutEvap_REF.p
+                    else:
+                        evap_p_ub = OutEvap_REF.p
+                
+                if abs(err_evap_p) < 1.0e-3:
+                    evap_a = 0
+                elif evap_p_ub - evap_p_lb < 1.0e-3:
+                    evap_a = 0
+            
+            M_ref_cal = (cond.V*cond_rho+evap.V*evap_rho)
+            err_cond_p = (M_ref_cal - Cycle_Inputs.M_ref)/Cycle_Inputs.M_ref
+            if err_cond_p < 0:
+                cond_p_lb = InCond_REF.p
+            else:
+                cond_p_ub = InCond_REF.p
+                
+            if abs(err_cond_p) < 1.0e-3:
+                cond_a = 0
+            elif cond_p_ub - cond_p_lb < 1.0e-3:
+                cond_a = 0
+            
 if __name__ == '__main__':
-    inputs = {
-        'hot_fluid': 'water',
-        'hot_T_in': 305.15,
-        'hot_T_out': 0.0,
-        'hot_p': 101300,
-        'hot_m': 1.0,
-        'cold_fluid': 'water',
-        'cold_T_in': 285.15,
-        'cold_T_out': 0.0,
-        'cold_p':1013000,
-        'cold_m':1.0,
-        'layout':'bas',
-        'DSH':5.0,
-        }
+    cycle_inputs = Cycle_Inputs()
+    comp_inputs = Comp_Inputs()
+    cond_inputs = PHX_Inputs()
+    evap_inputs = PHX_Inputs()
