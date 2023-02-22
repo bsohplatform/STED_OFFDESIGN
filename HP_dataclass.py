@@ -11,17 +11,13 @@ class Fluid_flow:
     h: float=0.0
     hl: float=0.0
     hg: float=0.0
-    s: float=0.0
-    d: float=0.0
-    dl: float=0.0
-    dg: float=0.0
-    c: float=0.0
-    l: float=0.0
-    v: float=0.0
-    pr: float=0.0
     Tcr: float=0.0
     Pcr: float=0.0
-    
+    c: float=0.0
+    v: float=0.0
+    pr: float=0.0
+    l: float=0.0
+    d: float=0.0
     
 @dataclass
 class Cycle_Inputs:
@@ -38,18 +34,14 @@ class Comp_Inputs:
     comp_frequency: float = 60.0 # Compressor frequency [Hz]
 
 @dataclass
-class PHE_Inputs:
-    type = 'phe'
-    phx_N_element: int = 30
-    phx_N_plate: int = 0 # Number of Plates
-    phx_phi: float = 0.0 # Ratio of developed length to projected length
-    phx_thk_plate: float = 0.0 # Single plate thickness
-    phx_thk_tot: float = 0.0 # Total thickness of PHE
-    phx_L_vert: float = 0.0 # Vertical length of PHE (Center to center of inlet and outlet ports)
-    phx_L_hor: float = 0.0 # Horizontal length of PHE (Center to center of inlet and outlet ports)
-    phx_L_width: float = 0.0 # total horizontal length of PHE
-    phx_D_p: float = 0.0 # Port Diameter
-    phx_beta: float = 0.0 # chevron angle
+class PHX_Inputs:
+    N_element: int = 30
+    N_plate: int = 0 # Number of Plates
+    thk_plate: float = 0.0 # Single plate thickness
+    thk_tot: float = 0.0 # Total thickness of PHE
+    L_vert: float = 0.0 # Vertical length of PHE (Center to center of inlet and outlet ports)
+    L_width: float = 0.0 # total horizontal length of PHE
+    beta: float = 0.0 # chevron angle
 
 @dataclass
 class Outputs:
@@ -63,7 +55,7 @@ class Outputs:
 class Aux_fn:
     @staticmethod
     def PropCal(Fluid_flow, outpar: str, par1: str, par2: str):
-        prop = {'T':Fluid_flow.T, 'P':Fluid_flow.p, 'H':Fluid_flow.h, 'S': Fluid_flow.s, 
+        prop = {'T':Fluid_flow.T, 'P':Fluid_flow.p, 'H':Fluid_flow.h, 
                          'D':Fluid_flow.d, 'C': Fluid_flow.c, 'L': Fluid_flow.l}
                 
         outval = PropsSI(outpar,par1,prop[par1],par2,prop[par2],Fluid_flow.Y)
