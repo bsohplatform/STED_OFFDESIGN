@@ -10,7 +10,7 @@ class COMP_module:
             primary_in.T =  DSH + primary_in.Ts
             primary_in.d = Aux_fn.PropCal(primary_in, 'D', 'T', 'P')
             primary_in.h = Aux_fn.PropCal(primary_in, 'H', 'T', 'P')
-            primary_in.s = Aux_fn.PropCal(primary_in, 'S', 'T', 'P')
+            s = Aux_fn.PropCal(primary_in, 'S', 'T', 'P')
             
             n_comp = Inputs.comp_n_poly
             V_comp = Inputs.comp_V_dis
@@ -26,7 +26,7 @@ class COMP_module:
             
             primary_out.h = primary_in.h + w_comp
             primary_out.T = Aux_fn.PropCal(primary_out, 'T', 'H', 'P')
-            h_comp_out_ideal = PropsSI('H','P',primary_out.p,'S',primary_in.s,primary_out.Y)
+            h_comp_out_ideal = PropsSI('H','P',primary_out.p,'S',s,primary_out.Y)
             comp_eff_isen = (h_comp_out_ideal - primary_in.h)/(primary_out.h - primary_in.h)
             
             try:
