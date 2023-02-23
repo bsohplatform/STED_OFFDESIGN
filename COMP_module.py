@@ -47,11 +47,10 @@ if __name__ == '__main__':
     comp_in.Ts = PropsSI('T','P',1.0e6,'Q',1.0,comp_in.Y)
     comp_out = Fluid_flow(Y='R410A',p = 3.0e6)
     inputs = Comp_Inputs()
-    inputs.comp_n_poly = 1.5
-    inputs.comp_V_dis = 21.0e-6
+    inputs.comp_n_poly = 2.3
+    inputs.comp_V_dis = 9.3e-6
     inputs.comp_frequency = 60
     inputs.comp_C_gap = 0.05
-    inputs.DSH = 5.0
     comp = COMP_module()
     (comp_in, comp_out, comp_W, comp_eff_isen, DSH, cond_a) = comp.Off(comp_in, comp_out, inputs, DSH = 5.0)
     

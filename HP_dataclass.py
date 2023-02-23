@@ -21,17 +21,19 @@ class Fluid_flow:
     
 @dataclass
 class Cycle_Inputs:
-    cycle_layout: str = 'bas'
-    cycle_DSH: float = 0.0    
+    layout: str = 'bas'
+    DSH: float = 0.0
+    DSC: float = 0.0
     M_ref: float = 0.0
-
+    cond_Q: float = 0.0
+    evap_Q: float = 0.0
 @dataclass
 class Comp_Inputs:
-    comp_V_dis: float = 0.0 # Displacement volume
-    comp_C_gap: float = 0.0 # Clearance factor (clearance/displacement)
-    comp_n_poly: float = 0.0 # Polytropic number
-    comp_eff_mech: float = 1.0 # mechanical_efficiency
-    comp_frequency: float = 60.0 # Compressor frequency [Hz]
+    V_dis: float = 0.0 # Displacement volume
+    C_gap: float = 0.0 # Clearance factor (clearance/displacement)
+    n_poly: float = 0.0 # Polytropic number
+    eff_mech: float = 1.0 # mechanical_efficiency
+    frequency: float = 60.0 # Compressor frequency [Hz]
 
 @dataclass
 class PHX_Inputs:
@@ -53,8 +55,7 @@ class Outputs:
     evap_Q: float = 0.0
     cond_Q: float = 0.0
     DSC: float = 0.0
-    cond_M: float = 0.0
-    evap_rho: float = 0.0
+    M_ref: float = 0.0
     
     comp_eff_isen: float = 0.0
 

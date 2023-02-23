@@ -348,13 +348,14 @@ if __name__ == '__main__':
     inputs.L_vert = 0.8
     inputs.N_plate = 187
     inputs.cor_pitch = 0.002
-    inputs.UA = 2000
+    inputs.UA = 50000
     inputs.dp = 0.005
     inputs.mdot_nominal = 9.0
     
-    noCond = 2
-    InCond = Fluid_flow(Y='Water', m=0.0, T=300, p = 101300.0)
-    OutCond = Fluid_flow(Y='Water', m=0.0, T=308, p = 101300.0)
+    '''
+    noCond = 1
+    InCond = Fluid_flow(Y='Water', m=10.0, T=300, p = 101300.0)
+    OutCond = Fluid_flow(Y='Water', m=10.0, T=0, p = 101300.0)
     if noCond == 0:
         OutCond.c = Aux_fn.PropCal(OutCond, 'C', 'T', 'P') 
         OutCond.c = Aux_fn.PropCal(OutCond, 'C', 'T', 'P') 
@@ -387,11 +388,11 @@ if __name__ == '__main__':
     InCond_REF.hg = PropsSI('H','P',InCond_REF.p,'Q',1.0, InCond_REF.Y )
     cond = HX_module(hx_type='phx',Inputs=inputs)
     (InCond_REF, OutCond_REF, InCond, OutCond, Q, mean_d)=cond.PHX('cond', False, InCond_REF, OutCond_REF, InCond, OutCond, noCond)
-    
     '''
+    
     noEvap = 2
-    InEvap = Fluid_flow(Y='Water', m=0.0, T=285.15, p = 101300.0)
-    OutEvap = Fluid_flow(Y='Water', m=0.0, T=280.15, p = 101300.0)
+    InEvap = Fluid_flow(Y='Water', m=0.0, T=280.15, p = 101300.0)
+    OutEvap = Fluid_flow(Y='Water', m=0.0, T=278.15, p = 101300.0)
     if noEvap == 0:
         OutEvap.c = Aux_fn.PropCal(OutEvap, 'C', 'T', 'P') 
         OutEvap.c = Aux_fn.PropCal(OutEvap, 'C', 'T', 'P') 
@@ -424,4 +425,4 @@ if __name__ == '__main__':
     OutEvap_REF.hg = PropsSI('H','P',OutEvap_REF.p,'Q',1.0, OutEvap_REF.Y )
     Evap = HX_module(hx_type='phx',Inputs=inputs)
     (OutEvap_REF, OutEvap_REF, InEvap, OutEvap, Q, mean_d)=Evap.PHX('evap', False, OutEvap_REF, OutEvap_REF, InEvap, OutEvap, noEvap)
-    '''
+    
