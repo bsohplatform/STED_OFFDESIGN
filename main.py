@@ -1,8 +1,7 @@
 from HP_dataclass import *
-import numpy as np
+from COMP_module import *
+from HX_module import *
 from CoolProp.CoolProp import PropsSI
-import COMP_module
-import HX_module
 
 class VCHP_off:
     def __init__(self, evap_BC, cond_BC):
@@ -133,11 +132,11 @@ class VCHP_off:
                 OutCond_REF.m = InCond_REF.m
                 InEvap_REF.m = OutEvap_REF.m
                 
-                cond = HX_module(hx_type='phx', Inputs=Cond_Inputs)
+                cond = HX_module(hx_type='phx', cor = False, Inputs=Cond_Inputs)
                 (InCond_REF, OutCond_REF, InCond, OutCond, cond_Q, cond_rho)=cond.PHX('cond',InCond_REF, OutCond_REF, InCond, OutCond, noCond)
                 Outputs.DSC = OutCond_REF.Ts - OutCond_REF.T
                 
-                evap = HX_module(hx_type='phx', Inputs=Evap_Inputs)
+                evap = HX_module(hx_type='phx', cor = False, Inputs=Evap_Inputs)
                 (InEvap_REF, OutEvap_REF, InEvap, OutEvap, evap_Q, evap_rho)=evap.PHX('evap',InEvap_REF, OutEvap_REF, InEvap, OutEvap, noEvap)
                 
                 if InEvap_REF.h == 0:
@@ -156,7 +155,7 @@ class VCHP_off:
                 
                 if abs(err_evap_p) < 1.0e-3:
                     evap_a = 0
-                elif evap_p_ub - evap_p_lb < 1.0e-3:
+                elif evap_p_ub - evap_p_lb < 0.1:
                     evap_a = 0
                     
             if self.cond_BC == 'dsc':
@@ -174,33 +173,37 @@ class VCHP_off:
             
             if abs(err_cond_p) < 1.0e-3:
                 cond_a = 0
-            elif cond_p_ub - cond_p_lb < 1.0e-3:
+            elif cond_p_ub - cond_p_lb < 0.1:
                 cond_a = 0
         
         Outputs.M_ref = cond.V*cond_rho+evap.V*evap_rho
+        Outputs.mean_rho = Outputs.M_ref/(cond.V + evap.V)
         Outputs.evap_Q = evap_Q
         Outputs.cond_Q = cond_Q
+        
+        return (InCond, OutCond, InEvap, OutEvap, InCond_REF, OutCond_REF, InEvap_REF, OutEvap_REF, Outputs)
         
 if __name__ == '__main__':
     cycle_inputs = Cycle_Inputs()
     comp_inputs = Comp_Inputs()
     cond_inputs = PHX_Inputs()
     evap_inputs = PHX_Inputs()
-    InEvap = Fluid_flow(Y='water',m=0.191,T=285.15, p = 101300.0)
-    OutEvap = Fluid_flow(Y='water',m=0.191,T=280.15, p = 101300.0)
+    InEvap = Fluid_flow(Y='water',m=0.191, p = 101300.0)
+    OutEvap = Fluid_flow(Y='water',m=0.191, T=280.15, p = 101300.0)
     InCond = Fluid_flow(Y='water',m=0.228,T=305.15, p = 101300.0)
     OutCond = Fluid_flow(Y='water',m=0.228, p = 101300.0)
     InEvap_REF = Fluid_flow(Y='R410A')
     OutEvap_REF = Fluid_flow(Y='R410A')
     InCond_REF = Fluid_flow(Y='R410A')
     OutCond_REF = Fluid_flow(Y='R410A')
+    outputs = Outputs()
     
     cycle_inputs.layout = 'bas'
     cycle_inputs.DSH = 3.0
-    cycle_inputs.DSC = 1.0
+    cycle_inputs.DSC = 0.01
     
-    comp_inputs.n_poly = 2.3
-    comp_inputs.V_dis = 9.3e-6
+    comp_inputs.n_poly = 2.5
+    comp_inputs.V_dis = 12.0e-6
     comp_inputs.frequency = 60
     comp_inputs.C_gap = 0.05
     
@@ -212,6 +215,7 @@ if __name__ == '__main__':
     evap_inputs.dp = 0.01
     evap_inputs.mdot_nominal = 0.191
     
+    
     bas_off = VCHP_off('h','dsc')
     (InCond, OutCond, InEvap, OutEvap, noCond, noEvap) = bas_off.Input_Processing(InCond, OutCond, InEvap, OutEvap)
-        
+    (InCond, OutCond, InEvap, OutEvap, InCond_REF, OutCond_REF, InEvap_REF, OutEvap_REF, outputs) = bas_off.OffDesign_Solver(InCond, OutCond, InEvap, OutEvap, InCond_REF, OutCond_REF, InEvap_REF, OutEvap_REF, cycle_inputs, comp_inputs, cond_inputs, evap_inputs, outputs, noCond, noEvap)
