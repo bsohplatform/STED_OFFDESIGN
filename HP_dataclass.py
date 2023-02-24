@@ -45,10 +45,12 @@ class PHX_Inputs:
     L_width: float = 0.0 # total horizontal length of PHE
     beta: float = 0.0 # chevron angle
     cor_pitch: float = 0.0 # corrugation pitch
+    A_flow: float = 0.0
     UA: float = 0.0
     dp: float = 0.0
     mdot_nominal:float = 0.0
-
+    cor: bool = False
+    htype: str = 'phx'
 @dataclass
 class Outputs:
     comp_W: float = 0.0
