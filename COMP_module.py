@@ -2,27 +2,27 @@ from CoolProp.CoolProp import PropsSI
 from HP_dataclass import *
 
 class COMP_module:
-    def __init__(self):
-        a = 1
+    def __init__(self, mode='poly'):
+        self.mode = mode
         
-    def Off(self, primary_in, primary_out, Inputs, mode='poly', DSH=5.0):
-        if mode == 'poly':
+    def Off(self, primary_in, primary_out, Inputs, DSH=5.0):
+        if self.mode == 'poly':
             primary_in.T =  DSH + primary_in.Ts
             primary_in.d = Aux_fn.PropCal(primary_in, 'D', 'T', 'P')
             primary_in.h = Aux_fn.PropCal(primary_in, 'H', 'T', 'P')
             s = Aux_fn.PropCal(primary_in, 'S', 'T', 'P')
             
-            n_comp = Inputs.comp_n_poly
-            V_comp = Inputs.comp_V_dis
-            f_comp = Inputs.comp_frequency
-            C_comp = Inputs.comp_C_gap
+            n_comp = Inputs.n_poly
+            V_comp = Inputs.V_dis
+            f_comp = Inputs.frequency
+            C_comp = Inputs.C_gap
             
             eff_vol = 1 + C_comp - C_comp*pow(primary_out.p/primary_in.p,1/n_comp)
             primary_in.m = eff_vol*primary_in.d*V_comp*f_comp
             primary_out.m = primary_in.m
             
             w_comp = (n_comp/(n_comp-1))*(primary_in.p/primary_in.d)*(pow(primary_out.p/primary_in.p,(n_comp-1)/n_comp) - 1); 
-            comp_W = primary_in.m*w_comp/Inputs.comp_eff_mech
+            comp_W = primary_in.m*w_comp/Inputs.eff_mech
             
             primary_out.h = primary_in.h + w_comp
             primary_out.T = Aux_fn.PropCal(primary_out, 'T', 'H', 'P')
