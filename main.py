@@ -132,12 +132,14 @@ class VCHP_off:
                 OutCond_REF.m = InCond_REF.m
                 InEvap_REF.m = OutEvap_REF.m
                 
-                cond = HX_module(hx_type='phx', cor = False, Inputs=Cond_Inputs)
-                (InCond_REF, OutCond_REF, InCond, OutCond, cond_Q, cond_rho)=cond.PHX('cond',InCond_REF, OutCond_REF, InCond, OutCond, noCond)
+                cond = HX_module(hx_type=Cond_Inputs.htype, cor = Cond_Inputs.cor, Inputs=Cond_Inputs)
+                if Cond_Inputs.htype == 'phx':                    
+                    (InCond_REF, OutCond_REF, InCond, OutCond, cond_Q, cond_rho)=cond.PHX('cond',InCond_REF, OutCond_REF, InCond, OutCond, noCond)                    
                 Outputs.DSC = OutCond_REF.Ts - OutCond_REF.T
                 
-                evap = HX_module(hx_type='phx', cor = False, Inputs=Evap_Inputs)
-                (InEvap_REF, OutEvap_REF, InEvap, OutEvap, evap_Q, evap_rho)=evap.PHX('evap',InEvap_REF, OutEvap_REF, InEvap, OutEvap, noEvap)
+                evap = HX_module(hx_type=Evap_Inputs.htype, cor = Evap_Inputs.cor, Inputs=Evap_Inputs)
+                if Evap_Inputs.htype == 'phx':
+                    (InEvap_REF, OutEvap_REF, InEvap, OutEvap, evap_Q, evap_rho)=evap.PHX('evap',InEvap_REF, OutEvap_REF, InEvap, OutEvap, noEvap)
                 
                 if InEvap_REF.h == 0:
                     evap_p_lb = OutEvap_REF.p
@@ -188,34 +190,48 @@ if __name__ == '__main__':
     comp_inputs = Comp_Inputs()
     cond_inputs = PHX_Inputs()
     evap_inputs = PHX_Inputs()
-    InEvap = Fluid_flow(Y='water',m=0.191, p = 101300.0)
-    OutEvap = Fluid_flow(Y='water',m=0.191, T=280.15, p = 101300.0)
-    InCond = Fluid_flow(Y='water',m=0.228,T=305.15, p = 101300.0)
-    OutCond = Fluid_flow(Y='water',m=0.228, p = 101300.0)
+    InEvap = Fluid_flow(Y='water',m=0.0, T=285.15, p = 101300.0)
+    OutEvap = Fluid_flow(Y='water',m=0.0, T=280.15, p = 101300.0)
+    InCond = Fluid_flow(Y='water',m=0.0,T=305.15, p = 101300.0)
+    OutCond = Fluid_flow(Y='water',m=0.0,T=310.15, p = 101300.0)
     InEvap_REF = Fluid_flow(Y='R410A')
     OutEvap_REF = Fluid_flow(Y='R410A')
     InCond_REF = Fluid_flow(Y='R410A')
     OutCond_REF = Fluid_flow(Y='R410A')
     outputs = Outputs()
-    
+
     cycle_inputs.layout = 'bas'
     cycle_inputs.DSH = 3.0
-    cycle_inputs.DSC = 0.01
-    
+    cycle_inputs.DSC = 1.0
+
     comp_inputs.n_poly = 2.5
-    comp_inputs.V_dis = 12.0e-6
+    comp_inputs.V_dis = 43.0e-6
     comp_inputs.frequency = 60
     comp_inputs.C_gap = 0.05
-    
-    cond_inputs.UA = 1600.0
-    cond_inputs.dp = 0.01
-    cond_inputs.mdot_nominal = 0.228
-    
-    evap_inputs.UA = 1350.0
-    evap_inputs.dp = 0.01
-    evap_inputs.mdot_nominal = 0.191
-    
-    
+
+    cond_inputs.N_element = 30
+    cond_inputs.N_plate = 40
+    cond_inputs.thk_plate = 0.0015
+    cond_inputs.thk_tot = 0.095
+    cond_inputs.L_vert = 0.48
+    cond_inputs.L_width = 0.12
+    cond_inputs.beta = 60
+    cond_inputs.A_flow = 2.39
+    cond_inputs.type = 'phx'
+    cond_inputs.cor = True
+
+    evap_inputs.N_element = 30
+    evap_inputs.N_plate = 50
+    evap_inputs.thk_plate = 0.0015
+    evap_inputs.thk_tot = 0.113
+    evap_inputs.L_vert = 0.527
+    evap_inputs.L_width = 0.17
+    evap_inputs.beta = 60
+    evap_inputs.A_flow = 2.8
+    evap_inputs.type = 'phx'
+    evap_inputs.cor = True
+
+
     bas_off = VCHP_off('h','dsc')
     (InCond, OutCond, InEvap, OutEvap, noCond, noEvap) = bas_off.Input_Processing(InCond, OutCond, InEvap, OutEvap)
     (InCond, OutCond, InEvap, OutEvap, InCond_REF, OutCond_REF, InEvap_REF, OutEvap_REF, outputs) = bas_off.OffDesign_Solver(InCond, OutCond, InEvap, OutEvap, InCond_REF, OutCond_REF, InEvap_REF, OutEvap_REF, cycle_inputs, comp_inputs, cond_inputs, evap_inputs, outputs, noCond, noEvap)
