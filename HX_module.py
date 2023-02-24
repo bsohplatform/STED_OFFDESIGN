@@ -12,9 +12,9 @@ class HX_module:
                 self.A_cx = self.phx_inputs.N_plate*b*self.phx_inputs.L_width
                 self.Dh = 2*b
                 self.R_plate = self.phx_inputs.thk_plate/15.0
-                self.A_flow = self.phx_inputs.L_width*self.phx_inputs.L_vert*(2*self.phx_inputs.N_plate - 1)
+                self.A_flow = self.phx_inputs.L_width*self.phx_inputs.L_vert*(2*self.phx_inputs.N_plate - 1) if self.phx_inputs.A_flow == 0 else self.phx_inputs.A_flow
                 self.V = b*self.phx_inputs.L_width*self.phx_inputs.L_vert
-                self.cor_pitch_to_Dh = self.phx_inputs.cor_pitch/self.Dh
+                self.cor_pitch_to_Dh = 2 if self.phx_inputs.cor_pitch == 0  else self.phx_inputs.cor_pitch/self.Dh
             else:
                 self.V = 1.0
     def PHX(self, purpose, primary_in, primary_out, secondary_in, secondary_out, noHX):
@@ -78,8 +78,7 @@ class HX_module:
             T_sec_lb = secondary_out.T if purpose == 'cond' else secondary_in.T
             T_sec_ub = secondary_out.T if purpose == 'cond' else secondary_in.T
             mdot_sec_lb = 0;
-            mdot_sec_ub = 3*(primary_in.hg - primary_in.hl)*primary_in.m/c_sec/(secondary_out.T - secondary_in.T)
-            mdot_sec_ub = mdot_sec_ub if purpose == 'cond' else -mdot_sec_ub
+            mdot_sec_ub = 3*(primary_in.hg - primary_in.hl)*primary_in.m/c_sec/(secondary_out.T - secondary_in.T) if purpose == 'cond' else 3*(primary_out.hg - primary_out.hl)*primary_out.m/c_sec/(secondary_in.T - secondary_out.T)
             
         
         T_primary[0] = primary_in.T if purpose == 'cond' else primary_out.T
@@ -101,7 +100,7 @@ class HX_module:
                 cl_primary = PropsSI('C','P',p_primary[0],'Q',0.0, primary_in.Y)
                 ll_primary = PropsSI('L','P',p_primary[0],'Q',0.0, primary_in.Y)
         
-                Xtt = pow((1-x_primary[0])/x_primary[0],0.9)*pow(dg_primary/dl_primary, 0.5)*pow(vl_primary/vg_primary, 0.1)
+                Xtt = pow((1-max(min(x_primary[0],1.0),0))/max(min(x_primary[0],1.0),0),0.9)*pow(dg_primary/dl_primary, 0.5)*pow(vl_primary/vg_primary, 0.1)
                 
                 G_primary[0] = G_primary_ref*((1-Xtt)+Xtt*pow(dl_primary/dg_primary,0.5))
                 Re_primary[0] = G_primary[0]*self.Dh/vl_primary
@@ -165,11 +164,13 @@ class HX_module:
             if cor == True:
                 if x_primary[0] > 0 and x_primary[0] < 1:
                     if purpose == 'cond':    
-                        Bo = Q_trans[0]/self.dA_flow/(G_primary[0]*(hg_primary - hl_primary))
+                        '''Bo = Q_trans[0]/self.dA_flow/(G_primary[0]*(hg_primary - hl_primary))
                         f_primary[0] = 21500*pow(Re_primary[0], -1.14)*pow(Bo, -0.085)
-                        dp_primary = 2*f_primary[0]*G_primary[0]**2*self.phx_inputs.L_vert/(self.phx_inputs.N_element-1)/(d_primary[0]*self.Dh)
+                        dp_primary = 2*f_primary[0]*G_primary[0]**2*self.phx_inputs.L_vert/(self.phx_inputs.N_element-1)/(d_primary[0]*self.Dh)'''
+                        dp_primary = 138*G_primary[0]/2/d_primary[0]
                     else:
                         dp_primary = -138*G_primary[0]/2/d_primary[0]
+                    dp_primary = -138*G_primary[0]/2/d_primary[0]
                 else:
                     f_primary[0] = 32/Re_primary[0]
                     dp_primary = 2*f_primary[0]*G_primary[0]**2*self.phx_inputs.L_vert/(self.phx_inputs.N_element-1)/(d_primary[0]*self.Dh)
@@ -199,7 +200,7 @@ class HX_module:
                         cl_primary = PropsSI('C','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
                         ll_primary = PropsSI('L','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
                         
-                        Xtt = pow((1-x_primary[jj+1])/x_primary[jj+1],0.9)*pow(dg_primary/dl_primary, 0.5)*pow(vl_primary/vg_primary, 0.1)
+                        Xtt = pow((1-max(min(x_primary[jj+1],1.0),0))/max(min(x_primary[jj+1],1.0),0),0.9)*pow(dg_primary/dl_primary, 0.5)*pow(vl_primary/vg_primary, 0.1)
                         
                         G_primary[jj+1] = G_primary_ref*((1-Xtt)+Xtt*pow(dl_primary/dg_primary,0.5))
                         Re_primary[jj+1] = G_primary[jj+1]*self.Dh/vl_primary
@@ -252,11 +253,12 @@ class HX_module:
                 if cor == True:
                     if x_primary[jj+1] > 0 and x_primary[jj+1] < 1:
                         if purpose == 'cond':
-                            Bo = Q_trans[jj+1]/self.dA_flow/(G_primary[jj+1]*(hg_primary - hl_primary))
+                            '''Bo = abs(Q_trans[jj+1])/self.A_flow/(self.phx_inputs.N_element-1)/(G_primary[jj+1]*(hg_primary - hl_primary))
                             f_primary[jj+1] = 21500*pow(Re_primary[jj+1], -1.14)*pow(Bo, -0.085)
-                            dp_primary = 2*f_primary[jj+1]*G_primary[jj+1]**2*self.phx_inputs.L_vert/(self.phx_inputs.N_element-1)/(d_primary[jj+1]*self.Dh)
+                            dp_primary = 2*f_primary[jj+1]*G_primary[jj+1]**2*self.phx_inputs.L_vert/(self.phx_inputs.N_element-1)/(d_primary[jj+1]*self.Dh)'''
+                            dp_primary =  138*G_primary[jj+1]/2/d_primary[jj+1]
                         else:
-                            dp_primary = -138*G_primary[jj+1]/2/d_primary[jj+1]   
+                            dp_primary = -138*G_primary[jj+1]/2/d_primary[jj+1]
                     else:
                         f_primary[jj+1] = 32/Re_primary[jj+1]
                         dp_primary = 2*f_primary[jj+1]*G_primary[jj+1]**2*self.phx_inputs.L_vert/(self.phx_inputs.N_element-1)/(d_primary[jj+1]*self.Dh)
@@ -307,7 +309,7 @@ class HX_module:
                 else:
                     if T_secondary_cal == 0.0:
                         if n < 20:
-                            T_sec_ub = T_sec
+                            mdot_sec_ub = mdot_sec
                         else:
                             a_PHX = 0
                     else:
@@ -325,12 +327,11 @@ class HX_module:
                         if mdot_sec_ub - mdot_sec_lb < 0.001:
                             a_PHX = 0
                     else:
-                        if T_sec_ub - T_sec_lb < 0.001:
+                        if T_sec_ub - T_sec_lb < 0.1:
                             a_PHX = 0
                 
         
         mean_d = d_primary.mean()
-        Q = Q_trans.sum()
         
         if purpose == 'cond':
             primary_out.T=T_primary[-1]
@@ -346,7 +347,7 @@ class HX_module:
             primary_in.h=h_primary[-1]
             primary_in.hl=hl_primary
             primary_in.hg=hg_primary
-        
+            
         if noHX == 0:
             secondary_in.T = T_secondary[-1]
         elif noHX == 1:
@@ -354,6 +355,8 @@ class HX_module:
         else:
             secondary_in.m = mdot_sec
             secondary_out.m = mdot_sec
+        
+        Q = abs(h_primary[0] - h_primary[-1])*primary_in.m
         
         return(primary_in, primary_out, secondary_in, secondary_out, Q, mean_d)
     
