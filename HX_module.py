@@ -189,7 +189,10 @@ class HX_module:
                 if x_primary[jj+1] < 0 and purpose == 'evap':
                     break
                 
-                T_primary[jj+1] = PropsSI('T','H',h_primary[jj+1],'P',p_primary[jj+1],primary_in.Y)
+                try:
+                    T_primary[jj+1] = PropsSI('T','H',h_primary[jj+1],'P',p_primary[jj+1],primary_in.Y)
+                except:
+                    break
                 if cor == True:
                     if x_primary[jj+1] > 0 and x_primary[jj+1] < 1:
                         dl_primary = PropsSI('D','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
@@ -349,9 +352,9 @@ class HX_module:
             primary_in.hg=hg_primary
             
         if noHX == 0:
-            secondary_in.T = T_secondary[-1]
+            secondary_in.T = T_secondary[-1] if purpose == 'cond' else T_secondary[0]
         elif noHX == 1:
-            secondary_out.T = T_secondary[-1]
+            secondary_out.T = T_secondary[0] if purpose == 'cond' else T_secondary[-1]
         else:
             secondary_in.m = mdot_sec
             secondary_out.m = mdot_sec

@@ -190,10 +190,10 @@ if __name__ == '__main__':
     comp_inputs = Comp_Inputs()
     cond_inputs = PHX_Inputs()
     evap_inputs = PHX_Inputs()
-    InEvap = Fluid_flow(Y='water',m=0.0, T=285.15, p = 101300.0)
-    OutEvap = Fluid_flow(Y='water',m=0.0, T=280.15, p = 101300.0)
-    InCond = Fluid_flow(Y='water',m=0.0,T=305.15, p = 101300.0)
-    OutCond = Fluid_flow(Y='water',m=0.0,T=310.15, p = 101300.0)
+    InEvap = Fluid_flow(Y='water',m=0.4883, T=285.15, p = 101300.0)
+    OutEvap = Fluid_flow(Y='water',m=0.4883, T=0.0, p = 101300.0)
+    InCond = Fluid_flow(Y='water',m=0.62145,T=305.15, p = 101300.0)
+    OutCond = Fluid_flow(Y='water',m=0.62145,T=0.0, p = 101300.0)
     InEvap_REF = Fluid_flow(Y='R410A')
     OutEvap_REF = Fluid_flow(Y='R410A')
     InCond_REF = Fluid_flow(Y='R410A')
@@ -202,8 +202,9 @@ if __name__ == '__main__':
 
     cycle_inputs.layout = 'bas'
     cycle_inputs.DSH = 3.0
-    cycle_inputs.DSC = 1.0
-
+    cycle_inputs.DSC = 0.001
+    cycle_inputs.M_ref = 0.01
+    
     comp_inputs.n_poly = 2.5
     comp_inputs.V_dis = 43.0e-6
     comp_inputs.frequency = 60
@@ -232,6 +233,6 @@ if __name__ == '__main__':
     evap_inputs.cor = True
 
 
-    bas_off = VCHP_off('h','dsc')
+    bas_off = VCHP_off('h','m')
     (InCond, OutCond, InEvap, OutEvap, noCond, noEvap) = bas_off.Input_Processing(InCond, OutCond, InEvap, OutEvap)
     (InCond, OutCond, InEvap, OutEvap, InCond_REF, OutCond_REF, InEvap_REF, OutEvap_REF, outputs) = bas_off.OffDesign_Solver(InCond, OutCond, InEvap, OutEvap, InCond_REF, OutCond_REF, InEvap_REF, OutEvap_REF, cycle_inputs, comp_inputs, cond_inputs, evap_inputs, outputs, noCond, noEvap)
