@@ -183,8 +183,13 @@ class HX_module:
                 h_primary[jj+1] = h_primary[jj] - Q_trans[jj]/primary_in.m
                 T_secondary[jj+1] = T_secondary[jj] - Q_trans[jj]/(c_sec*mdot_sec)
                 p_primary[jj+1] = p_primary[jj] - dp_primary
-                hl_primary = PropsSI('H','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
-                hg_primary =PropsSI('H','P',p_primary[jj+1],'Q',1.0, primary_in.Y)
+                try:
+                    hl_primary = PropsSI('H','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
+                    hg_primary = PropsSI('H','P',p_primary[jj+1],'Q',1.0, primary_in.Y)
+                except:
+                    hl_primary = PropsSI('H','P',p_primary[jj+1]*0.9,'Q',0.0, primary_in.Y)
+                    hg_primary = PropsSI('H','P',p_primary[jj+1]*0.9,'Q',1.0, primary_in.Y)
+                
                 x_primary[jj+1] = (h_primary[jj+1]-hl_primary)/(hg_primary - hl_primary)
                 if x_primary[jj+1] < 0 and purpose == 'evap':
                     break
@@ -195,14 +200,21 @@ class HX_module:
                     break
                 if cor == True:
                     if x_primary[jj+1] > 0 and x_primary[jj+1] < 1:
-                        dl_primary = PropsSI('D','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
-                        dg_primary = PropsSI('D','P',p_primary[jj+1],'Q',1.0, primary_in.Y)
+                        try:    
+                            dl_primary = PropsSI('D','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
+                            dg_primary = PropsSI('D','P',p_primary[jj+1],'Q',1.0, primary_in.Y)
+                            vl_primary = PropsSI('V','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
+                            vg_primary = PropsSI('V','P',p_primary[jj+1],'Q',1.0, primary_in.Y)
+                            cl_primary = PropsSI('C','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
+                            ll_primary = PropsSI('L','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
+                        except:
+                            dl_primary = PropsSI('D','P',p_primary[jj+1]*0.9,'Q',0.0, primary_in.Y)
+                            dg_primary = PropsSI('D','P',p_primary[jj+1]*0.9,'Q',1.0, primary_in.Y)
+                            vl_primary = PropsSI('V','P',p_primary[jj+1]*0.9,'Q',0.0, primary_in.Y)
+                            vg_primary = PropsSI('V','P',p_primary[jj+1]*0.9,'Q',1.0, primary_in.Y)
+                            cl_primary = PropsSI('C','P',p_primary[jj+1]*0.9,'Q',0.0, primary_in.Y)
+                            ll_primary = PropsSI('L','P',p_primary[jj+1]*0.9,'Q',0.0, primary_in.Y)
                         d_primary[jj+1] = 1/(x_primary[jj+1]/dg_primary+(1-x_primary[jj+1])/dl_primary)
-                        vl_primary = PropsSI('V','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
-                        vg_primary = PropsSI('V','P',p_primary[jj+1],'Q',1.0, primary_in.Y)
-                        cl_primary = PropsSI('C','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
-                        ll_primary = PropsSI('L','P',p_primary[jj+1],'Q',0.0, primary_in.Y)
-                        
                         Xtt = pow((1-max(min(x_primary[jj+1],1.0),0))/max(min(x_primary[jj+1],1.0),0),0.9)*pow(dg_primary/dl_primary, 0.5)*pow(vl_primary/vg_primary, 0.1)
                         
                         G_primary[jj+1] = G_primary_ref*((1-Xtt)+Xtt*pow(dl_primary/dg_primary,0.5))
@@ -279,8 +291,9 @@ class HX_module:
                     if T_secondary_cal == 0.0:
                         if n < 20:
                             T_sec_ub = T_sec
+                            err_T_sec = 1
                         else:
-                            a_PHX = 0
+                            err_T_sec = 0
                     else:    
                         err_T_sec = (secondary_out.T - T_secondary_cal)/secondary_out.T
                         if err_T_sec > 0:
@@ -295,13 +308,7 @@ class HX_module:
                     else:
                         T_sec_ub = T_sec
                 else:
-                    if T_secondary_cal == 0.0:
-                        if n < 20:
-                            T_sec_ub = T_sec
-                        else:
-                            a_PHX = 0
-                    else:
-                        err_T_sec = 0.0
+                    err_T_sec = 0.0
             else:
                 if purpose == 'cond':
                     err_T_sec = (secondary_in.T - T_secondary_cal)/secondary_in.T
@@ -313,8 +320,9 @@ class HX_module:
                     if T_secondary_cal == 0.0:
                         if n < 20:
                             mdot_sec_ub = mdot_sec
+                            err_T_sec = 1
                         else:
-                            a_PHX = 0
+                            err_T_sec = 0
                     else:
                         err_T_sec = (secondary_out.T - T_secondary_cal)/secondary_out.T        
                         if err_T_sec > 0:
@@ -322,31 +330,36 @@ class HX_module:
                         else:
                             mdot_sec_ub = mdot_sec
             
-            if T_secondary_cal > 0:
-                if abs(err_T_sec) < 1.0e-4:
-                    a_PHX = 0
+            if abs(err_T_sec) < 1.0e-4:
+                a_PHX = 0
+            else:
+                if noHX == 2:
+                    if mdot_sec_ub - mdot_sec_lb < 0.001:
+                        a_PHX = 0
                 else:
-                    if noHX == 2:
-                        if mdot_sec_ub - mdot_sec_lb < 0.001:
-                            a_PHX = 0
-                    else:
-                        if T_sec_ub - T_sec_lb < 0.1:
-                            a_PHX = 0
-                
+                    if T_sec_ub - T_sec_lb < 0.1:
+                        a_PHX = 0
+            
         
         mean_d = d_primary.mean()
         
         if purpose == 'cond':
             primary_out.T=T_primary[-1]
             primary_out.p=p_primary[-1]
-            primary_out.Ts=PropsSI('T','P',primary_out.p,'Q',0.0,primary_out.Y)
+            try:
+                primary_out.Ts=PropsSI('T','P',primary_out.p,'Q',0.5,primary_out.Y)
+            except:
+                primary_out.Ts = primary_out.T
             primary_out.h=h_primary[-1]
             primary_out.hl=hl_primary
             primary_out.hg=hg_primary
         else:
             primary_in.T=T_primary[-1]
             primary_in.p=p_primary[-1]
-            primary_in.Ts=PropsSI('T','P',primary_out.p,'Q',0.0,primary_out.Y)
+            try:
+                primary_in.Ts=PropsSI('T','P',primary_in.p,'Q',0.5,primary_in.Y)
+            except:
+                primary_in.Ts=primary_in.T
             primary_in.h=h_primary[-1]
             primary_in.hl=hl_primary
             primary_in.hg=hg_primary
@@ -359,8 +372,7 @@ class HX_module:
             secondary_in.m = mdot_sec
             secondary_out.m = mdot_sec
         
-        Q = abs(h_primary[0] - h_primary[-1])*primary_in.m
-        
+        Q = (h_primary[0] - h_primary[-1])*primary_in.m
         return(primary_in, primary_out, secondary_in, secondary_out, Q, mean_d)
     
 if __name__ == '__main__':
