@@ -142,19 +142,23 @@ class VCHP_off:
                     (InEvap_REF, OutEvap_REF, InEvap, OutEvap, evap_Q, evap_rho)=evap.PHX('evap',InEvap_REF, OutEvap_REF, InEvap, OutEvap, noEvap)
                 
                 if InEvap_REF.h == 0:
-                    evap_p_lb = OutEvap_REF.p
+                    if noEvap == 0:
+                        evap_p_lb = OutEvap_REF.p
+                    else:
+                        evap_p_ub = OutEvap_REF.p
+                    
                     err_evap_p = 1
                 else:
                     if self.evap_BC == 'q':
                         err_evap_p = (Cycle_Inputs.evap_Q - evap_Q)/Cycle_Inputs.evap_Q_cal
                     else:    
                         err_evap_p = (InEvap_REF.h - OutCond_REF.h)/OutCond_REF.h
-                
+                        
                     if err_evap_p < 0:
                         evap_p_lb = OutEvap_REF.p
                     else:
                         evap_p_ub = OutEvap_REF.p
-                
+                    
                 if abs(err_evap_p) < 1.0e-3:
                     evap_a = 0
                 elif evap_p_ub - evap_p_lb < 0.1:
@@ -164,7 +168,7 @@ class VCHP_off:
                 err_cond_p = (Outputs.DSC - Cycle_Inputs.DSC)/Cycle_Inputs.DSC 
             elif self.cond_BC == 'q':
                 err_cond_p = (cond_Q - Cycle_Inputs.cond_Q)/Cycle_Inputs.cond_Q
-            else:
+            elif self.cond_BC == 'm':
                 M_ref_cal = (cond.V*cond_rho+evap.V*evap_rho)
                 err_cond_p = (M_ref_cal - Cycle_Inputs.M_ref)/Cycle_Inputs.M_ref
             
@@ -186,24 +190,26 @@ class VCHP_off:
         return (InCond, OutCond, InEvap, OutEvap, InCond_REF, OutCond_REF, InEvap_REF, OutEvap_REF, Outputs)
         
 if __name__ == '__main__':
+    #R466A = 'REFPROP::R32[0.49]&R125[0.115]&CF3I[0.395]'
+    input_ref = 'R410A'
     cycle_inputs = Cycle_Inputs()
     comp_inputs = Comp_Inputs()
     cond_inputs = PHX_Inputs()
     evap_inputs = PHX_Inputs()
     InEvap = Fluid_flow(Y='water',m=0.4883, T=285.15, p = 101300.0)
     OutEvap = Fluid_flow(Y='water',m=0.4883, T=0.0, p = 101300.0)
-    InCond = Fluid_flow(Y='water',m=0.62145,T=305.15, p = 101300.0)
+    InCond = Fluid_flow(Y='water',m=0.62145,T=310.15, p = 101300.0)
     OutCond = Fluid_flow(Y='water',m=0.62145,T=0.0, p = 101300.0)
-    InEvap_REF = Fluid_flow(Y='R410A')
-    OutEvap_REF = Fluid_flow(Y='R410A')
-    InCond_REF = Fluid_flow(Y='R410A')
-    OutCond_REF = Fluid_flow(Y='R410A')
+    InEvap_REF = Fluid_flow(Y=input_ref)
+    OutEvap_REF = Fluid_flow(Y=input_ref)
+    InCond_REF = Fluid_flow(Y=input_ref)
+    OutCond_REF = Fluid_flow(Y=input_ref)
     outputs = Outputs()
 
     cycle_inputs.layout = 'bas'
     cycle_inputs.DSH = 3.0
     cycle_inputs.DSC = 0.001
-    cycle_inputs.M_ref = 0.01
+    cycle_inputs.M_ref = 0.099921
     
     comp_inputs.n_poly = 2.5
     comp_inputs.V_dis = 43.0e-6
