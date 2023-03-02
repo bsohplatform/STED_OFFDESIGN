@@ -30,7 +30,7 @@ class COMP_module:
             comp_eff_isen = (h_comp_out_ideal - primary_in.h)/(primary_out.h - primary_in.h)
             
             try:
-                primary_out.Ts = PropsSI('T','P',primary_out.T, 'Q', 1.0, primary_out.Y)
+                primary_out.Ts = PropsSI('T','P',primary_out.p, 'Q', 1.0, primary_out.Y)
             except:
                 primary_out.Ts = PropsSI('TCRIT','',0,'',0,primary_out.Y)
             if abs(primary_out.T - primary_out.Ts) < 0.1:
