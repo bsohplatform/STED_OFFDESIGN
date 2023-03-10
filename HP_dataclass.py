@@ -44,7 +44,8 @@ class PHX_Inputs:
     L_vert: float = 0.0 # Vertical length of PHE (Center to center of inlet and outlet ports)
     L_width: float = 0.0 # total horizontal length of PHE
     beta: float = 0.0 # chevron angle
-    cor_pitch: float = 0.0 # corrugation pitch
+    crg_pitch: float = 0.0 # corrugation pitch
+    crg_depth: float = 0.0 # corrugation depth
     A_flow: float = 0.0
     UA: float = 0.0
     dp: float = 0.0
