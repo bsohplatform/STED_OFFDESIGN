@@ -100,7 +100,12 @@ class VCHP_off:
         return (InCond, OutCond, InEvap, OutEvap, noCond, noEvap)
     
     def OffDesign_Solver(self, InCond, OutCond, InEvap, OutEvap, InCond_REF, OutCond_REF, InEvap_REF, OutEvap_REF, Cycle_Inputs, Comp_Inputs, Cond_Inputs, Evap_Inputs, Outputs, noCond, noEvap):
-        cond_p_ub = PropsSI('PCRIT','',0,'',0,InCond_REF.Y)
+        pcr = PropsSI('PCRIT','',0,'',0,InCond_REF.Y)
+        InCond_REF.pcr = pcr
+        OutCond_REF.pcr = pcr
+        InEvap_REF.pcr = pcr
+        OutEvap_REF.pcr = pcr
+        cond_p_ub = pcr
         if noCond == 0:
             cond_p_lb = PropsSI('P','T',OutCond.T, 'Q', 1.0, OutCond_REF.Y)
         else:
